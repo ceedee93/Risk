@@ -6565,12 +6565,33 @@ def render_references():
     """Render the complete reference list."""
     st.markdown("##### 📚 Literatur & Referenzen")
     for i, ref in enumerate(REFERENCES, 1):
-        journal_part = f" *{ref['journal']}*" if ref["journal"] else ""
-        volume_part = f" {ref['volume']}" if ref["volume"] else ""
+        # Build parts separately to avoid f-string quote conflicts
+        authors = ref["authors"]
+        year = ref["year"]
+        title = ref["title"]
+        journal = ref["journal"]
+        volume = ref["volume"]
+        relevance = ref["relevance"]
+
+        journal_part = ""
+        if journal:
+            journal_part = f" *{journal}*"
+        volume_part = ""
+        if volume:
+            volume_part = f" {volume}"
+
+        ref_text = (
+            f"**[{i}]** {authors} ({year}). "
+            f"*{title}.*"
+            f"{journal_part}{volume_part}."
+        )
+        relevance_html = (
+            f'<span style="color:#64748b;font-size:0.78rem">'
+            f"→ {relevance}</span>"
+        )
+
         st.markdown(
-            f"**[{i}]** {ref['authors']} ({ref['year']}). "
-            f""{ref['title']}."{journal_part}{volume_part}.\n\n"
-            f"<span style='color:#64748b;font-size:0.78rem'>→ {ref['relevance']}</span>",
+            ref_text + "\n\n" + relevance_html,
             unsafe_allow_html=True,
         )
 
