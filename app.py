@@ -2198,23 +2198,36 @@ def _assess_data_quality(data: PortfolioData) -> DataQualityReport:
 
 
 def render_quality_badge(quality: DataQualityReport) -> str:
-    """Render an HTML quality badge."""
+    """Render an HTML quality badge. Handles both Enum and string level values."""
+    # Robust level extraction — works with Enum or string
+    try:
+        level_val = quality.level.value if hasattr(quality.level, 'value') else str(quality.level)
+    except Exception:
+        level_val = "good"
+
     level_text = {
-        QualityLevel.EXCELLENT: "Exzellent",
-        QualityLevel.GOOD: "Gut",
-        QualityLevel.WARNING: "Warnung",
-        QualityLevel.CRITICAL: "Kritisch",
+        "excellent": "Exzellent",
+        "good": "Gut",
+        "warning": "Warnung",
+        "critical": "Kritisch",
     }
     level_icon = {
-        QualityLevel.EXCELLENT: "✅",
-        QualityLevel.GOOD: "🟢",
-        QualityLevel.WARNING: "⚠️",
-        QualityLevel.CRITICAL: "🔴",
+        "excellent": "✅",
+        "good": "🟢",
+        "warning": "⚠️",
+        "critical": "🔴",
     }
+
+    text = level_text.get(level_val, "Unbekannt")
+    icon = level_icon.get(level_val, "❓")
+    css_class = level_val if level_val in level_text else "good"
+
+    score = getattr(quality, 'score', 0)
+
     return (
-        f'<span class="quality-badge {quality.level.value}">'
-        f'{level_icon[quality.level]} {level_text[quality.level]} '
-        f'({quality.score:.0f}/100)</span>'
+        f'<span class="quality-badge {css_class}">'
+        f'{icon} {text} '
+        f'({score:.0f}/100)</span>'
     )
 
 
